@@ -3,6 +3,7 @@ package com.aiToolFinder.aiToolFinder.entity;
 
 import jakarta.persistence.*;
 
+
 @Entity
 public class Review {
 

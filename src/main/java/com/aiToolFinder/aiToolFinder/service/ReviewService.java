@@ -13,23 +13,22 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ToolRepository toolRepository;
+    private final ToolService toolService;
 
     public ReviewService(ReviewRepository reviewRepository,
-                         ToolRepository toolRepository) {
+                         ToolRepository toolRepository,
+                         ToolService toolService) {
         this.reviewRepository = reviewRepository;
         this.toolRepository = toolRepository;
+        this.toolService = toolService;
     }
 
     // USER: Submit review
-    public void submitReview(Long toolId, int rating, String comment) {
-
-        Review review = new Review();
-        review.setToolId(toolId);
-        review.setUserRating(rating);
-        review.setComment(comment);
-        review.setStatus("PENDING");
-
-        reviewRepository.save(review);
+    public Review postReview(Review review){
+        Review r = reviewRepository.save(review);
+        reviewRepository.flush();
+        toolService.updateRating(review.getToolId());
+        return r;
     }
 
     // ADMIN: Approve review
@@ -61,5 +60,9 @@ public class ReviewService {
 
         tool.setRating(avgRating);
         toolRepository.save(tool);
+    }
+
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll().stream().toList();
     }
 }

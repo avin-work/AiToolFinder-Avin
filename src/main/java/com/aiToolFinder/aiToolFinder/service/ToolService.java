@@ -1,6 +1,8 @@
 package com.aiToolFinder.aiToolFinder.service;
 
+import com.aiToolFinder.aiToolFinder.entity.Review;
 import com.aiToolFinder.aiToolFinder.entity.Tool;
+import com.aiToolFinder.aiToolFinder.repository.ReviewRepository;
 import com.aiToolFinder.aiToolFinder.repository.ToolRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +13,11 @@ import java.util.stream.Collectors;
 public class ToolService {
 
     private final ToolRepository toolRepository;
+    private final ReviewRepository reviewRepository;
 
-    public ToolService(ToolRepository toolRepository) {
+    public ToolService(ToolRepository toolRepository, ReviewRepository reviewRepository) {
         this.toolRepository = toolRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // USER: Fetch & filter tools
@@ -50,5 +54,23 @@ public class ToolService {
             existingTool.setPricingType(updatedTool.getPricingType());
 
         return toolRepository.save(existingTool);
+    }
+
+    public void updateRating(Long toolId) {
+
+        List<Review> reviews = reviewRepository.findAll();
+
+        double avgRating = reviews.stream()
+                .filter(r -> r.getToolId().equals(toolId))
+                .filter(r -> r.getStatus().equals("APPROVED"))
+                .mapToInt(Review::getUserRating)
+                .average()
+                .orElse(0.0);
+
+        Tool tool = toolRepository.findById(toolId)
+                .orElseThrow(() -> new RuntimeException("Tool not found"));
+
+        tool.setRating(avgRating);
+        toolRepository.save(tool);
     }
 }

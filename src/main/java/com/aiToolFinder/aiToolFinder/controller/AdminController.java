@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "http://127.0.0.1:5500", allowedHeaders = "*")
 public class AdminController {
 
     private final ToolService toolService;
@@ -19,7 +20,7 @@ public class AdminController {
     }
 
     // ADMIN: Add tool
-    @PostMapping("/tools")
+    @PostMapping("/tool")
     public Tool addTool(@RequestBody Tool tool) {
         return toolService.addTool(tool);
     }
@@ -32,7 +33,7 @@ public class AdminController {
     }
 
     // ADMIN: Approve review
-    @PostMapping("/reviews/{id}/approve")
+    @PutMapping("/review/{id}/approve")
     public String approveReview(@PathVariable Long id) {
         reviewService.approveReview(id);
         return "Review approved";
